@@ -1,15 +1,20 @@
-
 import Sound.Tidal.OscStream
 
-
-let p5Shape = dirt {cpsStamp = False, latency = 0}
+let p5Shape = dirt {cpsStamp = False, latency = 0.28}
     p5Slang = superDirtSlang {timestamp = NoStamp,
                               preamble = []
                              }
     p5Stream = do
       s <- makeConnection "127.0.0.1" 1818 p5Slang
       stream (Backend s $ (\_ _ _ -> return ())) p5Shape
-    (scene, _) = pS "scene" Nothing
+    (n1, _)  = pF "n1" Nothing
+    (n2, _)  = pF "n2" Nothing
+    (n3, _)  = pF "n3" Nothing
+    (n4, _)  = pF "n4" Nothing    
+    (n5, _)  = pF "n5" Nothing
+    (n6, _)  = pF "n6" Nothing
+    (n7, _)  = pF "n7" Nothing
+    (n8, _)  = pF "n8" Nothing
     combinedStream = do p5 <- p5Stream
                         ds <- superDirtState 57120
                         let d = setter ds
@@ -18,10 +23,21 @@ let p5Shape = dirt {cpsStamp = False, latency = 0}
 
 x1 <- combinedStream
 
-x1 $ sound "bd(3,8)"
-  # scene "bing"
-
-
-
 let hush = mapM_ ($ silence) [d1,d2,d3,d4,d5,d6,d7,d8,d9,d10,x1]
 let solo = (>>) hush
+
+bps(125/120)
+
+hush
+
+x1 $ every 2 (rev) $ stack [ 
+   s "bd(5,8)" # n1 "0.5 1 2",
+   s "hh*8" # n2 rand # n3 (slow 6 sine),
+   s "808:4(<7 5>,16)" # n4 "1 0 0.5 0.25",
+   s "chin" # n5 "<0 0.2 0.4 0.8>" 
+  ] 
+   |+| n "[0 0 0 0 0 0 0 < 10 9 8>]"
+    # n6 "0 1 0 1"
+    # n7 (slow 8 sine)
+    # n8 "<0 0.2>"
+ 
